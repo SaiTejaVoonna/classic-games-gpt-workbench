@@ -280,7 +280,9 @@
       ug.addColorStop(0, o.under + 'aa'); ug.addColorStop(1, o.under + '00');
       g.fillStyle = ug; g.beginPath(); g.ellipse(x, by, Wd * .9, Wd * .22, 0, 0, TAU); g.fill();
     }
-    g.fillStyle = '#0b0d12'; rr(x - Wd * .47, by - Wd * .2, Wd * .14, Wd * .2, Wd * .04); g.fill(); rr(x + Wd * .33, by - Wd * .2, Wd * .14, Wd * .2, Wd * .04); g.fill();
+    // Rear tyres, drawn behind the body but with visible outer tread and sidewall.
+    g.fillStyle = '#10131a'; rr(x - Wd * .49, by - Wd * .25, Wd * .17, Wd * .29, Wd * .035); g.fill(); rr(x + Wd * .32, by - Wd * .25, Wd * .17, Wd * .29, Wd * .035); g.fill();
+    g.fillStyle = '#8993a1'; rr(x - Wd * .455, by - Wd * .19, Wd * .09, Wd * .12, Wd * .018); g.fill(); rr(x + Wd * .365, by - Wd * .19, Wd * .09, Wd * .12, Wd * .018); g.fill();
     var tail = o.tail || '#ff3a3a';
     if (T.box) {
       var h = Wd;
