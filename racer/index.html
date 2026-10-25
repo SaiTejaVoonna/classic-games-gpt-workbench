@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <title>Racer | Classic Games</title>
+  <meta name="description" content="Racer, an early playable prototype of a Classic Games road game.">
+  <link rel="stylesheet" href="racer.css">
+  <script src="audio.js" defer></script>
+  <script src="racer.js" defer></script>
+</head>
+<body>
+  <main class="stage" id="stage">
+    <canvas id="c" aria-label="Racer road view. Swipe left or right, or use the arrow keys, to change lane."></canvas>
+
+    <div class="hud" id="hud">
+      <div class="score"><b id="dist">0</b><small>score</small></div>
+      <button class="pausebtn" id="pause" type="button" aria-label="Pause">II</button>
+      <div class="lv"><span id="hearts" aria-label="Lives"></span><span id="coinc">&#9679; 0</span></div>
+      <div class="trip" id="trip" hidden><div class="bar"><u id="trip-fill"></u></div><div class="dots" id="trip-dots"></div></div>
+      <div class="chapter" id="chapter"><small id="ch-num"></small><b id="ch-name"></b></div>
+      <div class="near" id="near" aria-live="polite"></div>
+      <button class="brake" id="brake" type="button" aria-pressed="false">Hold to ease off</button>
+      <div class="spd"><b id="spd">0</b><small>km/h</small></div>
+    </div>
+
+    <div class="overlay" id="ov" data-kind="menu">
+      <p class="ov-title" id="ov-title">Racer</p>
+      <p class="ov-sub" id="ov-sub"></p>
+      <div class="stats" id="ov-stats" hidden></div>
+      <div class="opts" id="opts">
+        <div class="opt" data-opt="mode" role="group" aria-label="Mode"><span>Trip</span><button type="button" data-val="journey">Journey</button><button type="button" data-val="endless">Endless</button></div>
+        <div class="opt" data-opt="difficulty" role="group" aria-label="Difficulty"><span>Level</span><button type="button" data-val="easy">Easy &#9829;&#9829;&#9829;</button><button type="button" data-val="normal">Normal &#9829;&#9829;</button><button type="button" data-val="hard">Hard &#9829;</button></div>
+        <div class="opt" data-opt="speed" role="group" aria-label="Speed"><span>Speed</span><button type="button" data-val="relaxed">Relaxed</button><button type="button" data-val="normal">Normal</button><button type="button" data-val="fast">Fast</button></div>
+        <div class="opt" data-opt="length" id="opt-length" role="group" aria-label="Journey length"><span>Length</span><button type="button" data-val="demo">Short, 3 min</button><button type="button" data-val="full">Full, 11 min</button></div>
+        <p class="best" id="best-line"></p>
+      </div>
+      <button class="big" id="play" type="button">Play</button>
+      <button class="big alt" id="cont" type="button" hidden>Continue</button>
+      <button class="link" id="sound-btn" type="button">Sound and music</button>
+      <button class="link" id="menu-btn" type="button" hidden>Trip options</button>
+      <a class="link" href="../">Back to games</a>
+    </div>
+
+    <div class="sheet" id="ps" hidden role="dialog" aria-label="Paused">
+      <div class="grab"></div><h2>Paused</h2>
+      <div class="row"><button class="b p" id="ps-resume" type="button">Resume</button><button class="b" id="ps-restart" type="button">Restart</button></div>
+      <div class="row"><button class="b" id="ps-sound" type="button">Sound and music</button><a class="b" href="../">Quit to games</a></div>
+    </div>
+
+    <div class="sheet" id="ss" hidden role="dialog" aria-label="Sound and music">
+      <div class="grab"></div><h2>Sound and music</h2>
+      <div class="opt" data-opt="music" role="group" aria-label="Music"><span>Music</span><button type="button" data-val="on">On</button><button type="button" data-val="off">Off</button></div>
+      <div class="opt" data-opt="sfx" role="group" aria-label="Effects"><span>Effects</span><button type="button" data-val="on">On</button><button type="button" data-val="off">Off</button></div>
+      <div class="opt wrap" data-opt="style" role="group" aria-label="Music style"><span>Style</span><button type="button" data-val="auto">Auto</button><button type="button" data-val="cinematic">Cinematic</button><button type="button" data-val="piano">Piano</button><button type="button" data-val="electronic">Electronic</button><button type="button" data-val="acoustic">Acoustic</button></div>
+      <label class="rng">Music volume<input id="vol-music" type="range" min="0" max="100" step="1"></label>
+      <label class="rng">Effects volume<input id="vol-fx" type="range" min="0" max="100" step="1"></label>
+      <label class="rng">Bass<input id="vol-bass" type="range" min="0" max="100" step="1"></label>
+      <div class="opt" data-opt="calm" role="group" aria-label="Calm mode"><span>Calm</span><button type="button" data-val="on">On</button><button type="button" data-val="off">Off</button></div>
+      <p class="note">Calm mode is quieter, softer on the top end and has no sudden hits. The sound switch in the games menu turns all sound off.</p>
+      <div class="row"><button class="b p" id="ss-close" type="button">Done</button></div>
+    </div>
+  </main>
+</body>
+</html>
