@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Snake styles, mazes and colours (mockups, not the game)</title>
+<style>
+  body { margin: 0; padding: 24px 28px; background: #0e1420; color: #fff; font-family: system-ui, sans-serif; }
+  h1 { font-size: 26px; margin: 0 0 6px; } p.sub { margin: 0 0 18px; color: #9fb3c8; font-size: 15px; }
+  .grid { display: grid; gap: 18px; }
+  .g3 { grid-template-columns: repeat(3, 440px); } .g4 { grid-template-columns: repeat(4, 360px); } .g5 { grid-template-columns: repeat(5, 300px); }
+  .tile { background: #151d2e; border-radius: 14px; padding: 10px 10px 12px; }
+  .tile h3 { margin: 2px 4px 8px; font-size: 16px; display: flex; justify-content: space-between; } .tile h3 small { font-weight: 400; color: #9fb3c8; font-size: 13px; }
+  .tile canvas { width: 100%; display: block; border-radius: 10px; border: 2px solid #e6edf5; }
+  .sw { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; } .sw i { display: inline-block; width: 26px; height: 26px; border-radius: 50%; border: 2px solid #fff4; }
+</style>
+</head>
+<body>
+<h1 id="title"></h1><p class="sub" id="sub"></p>
+<div class="grid" id="grid"></div>
+<script src="../../src/engine.js"></script>
+<script src="../../src/render.js"></script>
+<script>
+(function () {
+  var E = SnakeEngine, R = SnakeRender;
+  var q = new URLSearchParams(location.search).get('sheet');
+  var PAL = {
+    night: { board: '#08111f', boardLine: '#12304a', snake: '#34e39c', snakeHead: '#7cf7c0', snakeEdge: '#01070a', shine: '#ffffff', eye: '#0a1a14', pupil: '#ffffff', food: '#ff6b5e', bonus: '#ffd166', obstacle: '#6b84a3', obstacleEdge: '#9db6d3' },
+    colour: { board: '#e8e1cd', boardLine: '#d6ceb6', snake: '#2f7d4f', snakeHead: '#1f5c38', snakeEdge: '#1b3d2a', shine: '#ffffff', eye: '#ffffff', pupil: '#1b1b1b', food: '#a85f00', bonus: '#9a3412', obstacle: '#7a7261', obstacleEdge: '#5f594c' },
+    lcd: { board: '#b4c58a', boardLine: '#a3b57a', snake: '#1b2613', snakeHead: '#1b2613', snakeEdge: '#1b2613', shine: '#d6e1b4', eye: '#d6e1b4', pupil: '#1b2613', food: '#1b2613', bonus: '#1b2613', obstacle: '#4a5a2c', obstacleEdge: '#1b2613' }
+  };
+  function tint(p, body, head, edge) { return Object.assign({}, p, { snake: body, snakeHead: head, snakeEdge: edge || p.snakeEdge }); }
+  var W = 420, H = 280; // 21 x 14 cells of 20 px, drawn at 2x
+  function cv() { var c = document.createElement('canvas'); c.width = W * 2; c.height = H * 2; return c; }
+  function game(cells, over) { var g = E.createGame({ seed: 3 }); return Object.assign({}, g, { snake: cells.map(function (c) { return { x: c[0], y: c[1] }; }), dir: 'right', food: null }, over || {}); }
+  function rectsToState(rects) {
+    var obs = []; rects.forEach(function (r) { for (var i = 0; i < r[2]; i++) for (var j = 0; j < r[3]; j++) obs.push({ x: r[0] + i, y: r[1] + j }); });
+    var b = {}; obs.forEach(function (o) { b[o.x + ',' + o.y] = true; });
+    return { obstacles: obs, blocked: b };
+  }
+  function tile(host, title, small, c) { var t = document.createElement('div'); t.className = 'tile'; t.innerHTML = '<h3>' + title + '<small>' + (small || '') + '</small></h3>'; t.appendChild(c); host.appendChild(t); return t; }
+  var grid = document.getElementById('grid');
+
+  var PATH = [[13,5],[12,5],[11,5],[10,5],[9,5],[8,5],[8,6],[8,7],[9,7],[10,7],[11,7],[12,7],[12,8],[12,9],[11,9],[10,9],[9,9],[8,9]];
+  var FOOD = { x: 16, y: 3 };
+  function board(pal) { var c = cv(); c.style.background = pal.board; return c; }
+  function base(c, pal, st) { R.draw(c.getContext('2d'), game(PATH, Object.assign({ food: FOOD }, st || {})), pal, c.width, c.height); }
+
+  function centers(c) { var l = R.layout(21, 14, c.width, c.height); return { l: l, pts: PATH.map(function (p) { return R.cellCenter(l, p[0], p[1]); }) }; }
+
+  // ---------- snake styles ----------
+  var styles = [
+    ['Modern tube', 'current style', 'night', function (c, pal) { base(c, pal); }],
+    ['Classic pixel', 'old phone feel', 'lcd', function (c, pal) {
+      var ctx = c.getContext('2d'), k = centers(c), s = k.l.cell;
+      var g = game(PATH, { food: null }); // grid
+      R.draw(ctx, Object.assign({}, g, { snake: [{ x: -5, y: -5 }] }), pal, c.width, c.height);
+      ctx.fillStyle = pal.snake;
+      PATH.forEach(function (p) { var x = k.l.ox + p[0] * s, y = k.l.oy + p[1] * s; ctx.fillRect(x + s * 0.1, y + s * 0.1, s * 0.8, s * 0.8); });
+      ctx.fillRect(k.l.ox + FOOD.x * s + s * 0.25, k.l.oy + FOOD.y * s + s * 0.25, s * 0.5, s * 0.5);
+      ctx.fillStyle = pal.snakeHead; ctx.fillStyle = pal.board; var h = PATH[0];
+      ctx.fillRect(k.l.ox + h[0] * s + s * 0.55, k.l.oy + h[1] * s + s * 0.25, s * 0.15, s * 0.15);
+    }],
+    ['Striped', 'bands along the body', 'colour', function (c, pal) {
+      base(c, pal); var ctx = c.getContext('2d'), k = centers(c);
+      ctx.save(); ctx.globalAlpha = 0.28; ctx.fillStyle = '#10321f';
+      for (var i = 1; i < PATH.length - 1; i += 2) { var a = k.pts[i], b = k.pts[i + 1], dx = b.x - a.x, dy = b.y - a.y, L = Math.hypot(dx, dy) || 1, nx = -dy / L, ny = dx / L, r = R.bodyRadius(i, PATH.length, k.l.cell) * 0.9;
+        ctx.beginPath(); ctx.moveTo(a.x + nx * r, a.y + ny * r); ctx.lineTo(b.x + nx * r, b.y + ny * r); ctx.lineTo(b.x - nx * r, b.y - ny * r); ctx.lineTo(a.x - nx * r, a.y - ny * r); ctx.closePath(); ctx.fill(); }
+      ctx.restore();
+    }],
+    ['Scales', 'diamond pattern', 'night', function (c, pal) {
+      pal = tint(pal, '#a78bfa', '#c4b5fd', '#0a0614'); base(c, pal); var ctx = c.getContext('2d'), k = centers(c);
+      ctx.save(); ctx.globalAlpha = 0.32; ctx.fillStyle = '#1b1040';
+      k.pts.forEach(function (p, i) { if (i === 0 || i === k.pts.length - 1) return; var r = k.l.cell * 0.2; ctx.beginPath(); ctx.moveTo(p.x, p.y - r); ctx.lineTo(p.x + r, p.y); ctx.lineTo(p.x, p.y + r); ctx.lineTo(p.x - r, p.y); ctx.closePath(); ctx.fill(); });
+      ctx.restore();
+    }],
+    ['Beads', 'round linked segments', 'colour', function (c, pal) {
+      pal = tint(pal, '#0e7490', '#164e63', '#082f49'); R.draw(c.getContext('2d'), game([[-9, -9]], { food: FOOD }), pal, c.width, c.height);
+      var ctx = c.getContext('2d'), k = centers(c);
+      for (var i = PATH.length - 1; i >= 0; i--) { var p = k.pts[i]; var r = (i === 0 ? 0.5 : 0.42 - Math.max(0, (i - 12)) * 0.03) * k.l.cell;
+        ctx.fillStyle = 'rgba(0,0,0,.25)'; ctx.beginPath(); ctx.arc(p.x, p.y + 2, r, 0, 7); ctx.fill();
+        ctx.fillStyle = i === 0 ? pal.snakeHead : pal.snake; ctx.beginPath(); ctx.arc(p.x, p.y, r, 0, 7); ctx.fill();
+        ctx.fillStyle = 'rgba(255,255,255,.25)'; ctx.beginPath(); ctx.arc(p.x - r * 0.3, p.y - r * 0.3, r * 0.3, 0, 7); ctx.fill(); }
+      var h = k.pts[0]; ctx.fillStyle = '#fff'; [-1, 1].forEach(function (s) { ctx.beginPath(); ctx.arc(h.x + k.l.cell * 0.12, h.y + s * k.l.cell * 0.2, k.l.cell * 0.12, 0, 7); ctx.fill(); });
+      ctx.fillStyle = '#111'; [-1, 1].forEach(function (s) { ctx.beginPath(); ctx.arc(h.x + k.l.cell * 0.16, h.y + s * k.l.cell * 0.2, k.l.cell * 0.06, 0, 7); ctx.fill(); });
+    }],
+    ['Neon', 'glowing outline', 'night', function (c, pal) {
+      pal = tint(pal, '#22d3ee', '#a5f3fc', '#001418'); base(c, pal); var ctx = c.getContext('2d'), k = centers(c);
+      ctx.save(); ctx.globalCompositeOperation = 'destination-over'; ctx.strokeStyle = '#22d3ee'; ctx.shadowColor = '#22d3ee'; ctx.shadowBlur = 26; ctx.lineWidth = k.l.cell * 1.0; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+      ctx.beginPath(); k.pts.forEach(function (p, i) { if (i) ctx.lineTo(p.x, p.y); else ctx.moveTo(p.x, p.y); }); ctx.stroke(); ctx.restore();
+    }],
+    ['Pixel cobra', 'blocky with eyes', 'night', function (c, pal) {
+      pal = tint(pal, '#34e39c', '#7cf7c0'); var ctx = c.getContext('2d'), k = centers(c), s = k.l.cell;
+      R.draw(ctx, game([[-9, -9]], { food: FOOD }), pal, c.width, c.height);
+      PATH.forEach(function (p, i) { var x = k.l.ox + p[0] * s, y = k.l.oy + p[1] * s; ctx.fillStyle = i === 0 ? pal.snakeHead : (i % 2 ? pal.snake : '#25b97c'); ctx.fillRect(x + s * 0.06, y + s * 0.06, s * 0.88, s * 0.88); });
+      var h = PATH[0], hx = k.l.ox + h[0] * s, hy = k.l.oy + h[1] * s; ctx.fillStyle = '#0a1a14'; ctx.fillRect(hx + s * 0.55, hy + s * 0.2, s * 0.18, s * 0.18); ctx.fillRect(hx + s * 0.55, hy + s * 0.62, s * 0.18, s * 0.18);
+    }]
+  ];
+
+  // ---------- mazes (rectangles [x, y, w, h] on 21 x 14) ----------
+  var MAZES = [
+    ['Clear field', 'in the game', []],
+    ['Pillars', 'in the game', E.MAZES.pillars], ['Gate', 'in the game', E.MAZES.gate], ['Frame', 'in the game', E.MAZES.frame],
+    ['Corners', 'new', [[1,1,4,1],[1,1,1,3],[16,1,4,1],[19,1,1,3],[1,12,4,1],[1,10,1,3],[16,12,4,1],[19,10,1,3]]],
+    ['Tunnels', 'new', [[2,4,7,1],[12,4,7,1],[2,10,7,1],[12,10,7,1]]],
+    ['Zigzag', 'new', [[6,0,1,5],[10,9,1,5],[14,0,1,5],[18,9,1,5]]],
+    ['Rooms', 'new', [[3,3,7,1],[11,3,7,1],[3,10,7,1],[11,10,7,1],[3,3,1,3],[17,3,1,3],[3,8,1,3],[17,8,1,3]]],
+    ['Diamond', 'new', [[10,2,1,1],[9,3,1,1],[11,3,1,1],[8,4,1,1],[12,4,1,1],[10,12,1,1],[9,11,1,1],[11,11,1,1],[8,10,1,1],[12,10,1,1]]],
+    ['Islands', 'new', [[4,3,2,1],[9,2,2,1],[15,3,2,1],[3,10,2,1],[8,11,2,1],[14,10,2,1],[17,6,1,2],[12,5,1,2]]],
+    ['Staircase', 'new', [[2,1,1,1],[3,2,1,1],[4,3,1,1],[5,4,1,1],[6,5,1,1],[14,8,1,1],[15,9,1,1],[16,10,1,1],[17,11,1,1],[18,12,1,1]]],
+    ['Bars', 'new', [[5,0,1,4],[5,10,1,4],[15,0,1,4],[15,10,1,4]]]
+  ];
+  function connected(rects) {
+    var st = rectsToState(rects), seen = {}, q2 = [[7, 7]], free = 0, x, y; seen['7,7'] = 1;
+    for (y = 0; y < 14; y++) for (x = 0; x < 21; x++) if (!st.blocked[x + ',' + y]) free++;
+    var n = 1;
+    while (q2.length) { var c = q2.shift(); [[1,0],[-1,0],[0,1],[0,-1]].forEach(function (d) { var nx = c[0] + d[0], ny = c[1] + d[1], k = nx + ',' + ny; if (nx < 0 || ny < 0 || nx >= 21 || ny >= 14 || st.blocked[k] || seen[k]) return; seen[k] = 1; n++; q2.push([nx, ny]); }); }
+    var startClear = true; for (x = 0; x <= 14; x++) if (st.blocked[x + ',7']) startClear = false;
+    return n === free && startClear;
+  }
+
+  var colours = [['Green', '#34e39c', '#7cf7c0'], ['Cyan', '#22d3ee', '#a5f3fc'], ['Blue', '#60a5fa', '#bfdbfe'], ['Violet', '#a78bfa', '#ddd6fe'], ['Pink', '#f472b6', '#fbcfe8'], ['Lime', '#a3e635', '#d9f99d']];
+
+  if (q === 'styles') {
+    document.getElementById('title').textContent = 'Snake styles (mock): same path, same rules';
+    document.getElementById('sub').textContent = 'Only the drawing changes. Movement, collisions and scoring stay the same. Each style would be a choice in Settings.';
+    grid.className = 'grid g3';
+    styles.forEach(function (s) { var pal = PAL[s[2]]; var c = board(pal); s[3](c, pal); tile(grid, s[0], s[1], c); });
+  } else if (q === 'mazes') {
+    document.getElementById('title').textContent = 'Maze layouts (mock): 3 in the game, 8 new ideas';
+    document.getElementById('sub').textContent = 'Blocks are solid grid squares. Every layout keeps the start row clear and every free cell reachable (checked by script). New layouts need engine tests and a picker in Game setup.';
+    grid.className = 'grid g4';
+    MAZES.forEach(function (m) {
+      var pal = PAL.night, c = board(pal), st = rectsToState(m[2]);
+      var ok = connected(m[2]);
+      R.draw(c.getContext('2d'), Object.assign({}, game([[7,7],[6,7],[5,7]], { food: { x: 19, y: 7 } }), st), pal, c.width, c.height);
+      tile(grid, m[0], m[1] + (ok ? ' · reachable' : ' · CHECK'), c);
+      window.__mazeOk = (window.__mazeOk || []).concat([m[0] + ':' + ok]);
+    });
+  } else if (q === 'colours') {
+    document.getElementById('title').textContent = 'Snake colours (mock)';
+    document.getElementById('sub').textContent = 'Colour and Night themes. LCD stays monochrome. No red, orange or yellow so the snake never looks like the fruit or the bonus.';
+    grid.className = 'grid g3';
+    colours.forEach(function (cl) { var pal = tint(PAL.night, cl[1], cl[2], '#01070a'); var c = board(pal); base(c, pal); var t = tile(grid, cl[0], 'Night', c); });
+  }
+  document.title = 'ready';
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <title>Racer | Classic Games</title>
+  <meta name="description" content="Racer, an early playable prototype of a Classic Games road game.">
+  <link rel="stylesheet" href="racer.css">
+  <script src="../src/sfx.js" defer></script>
+  <script src="racer.js" defer></script>
+</head>
+<body>
+  <main class="stage" id="stage">
+    <canvas id="c" aria-label="Racer road view. Swipe left or right, or use the arrow keys, to change lane."></canvas>
+    <div class="hud" id="hud">
+      <div class="dist"><b id="dist">0</b><small>meters</small></div>
+      <div class="ring" id="ring" style="--p:0%"><i id="combo">x1</i></div>
+      <div class="chapter" id="chapter"><small id="ch-num"></small><b id="ch-name"></b></div>
+      <div class="near" id="near"></div>
+      <div class="spd"><b id="spd">0</b><small>km/h</small></div>
+      <button class="mute" id="mute" type="button" aria-pressed="false" aria-label="Sound">Sound on</button>
+    </div>
+    <div class="overlay" id="ov">
+      <p class="ov-title" id="ov-title">Racer</p>
+      <p class="ov-sub" id="ov-sub">Swipe left or right to change lane. Pass close to traffic for combos.</p>
+      <button class="big" id="play" type="button">Play</button>
+      <a class="back" href="../index.html">Snake</a>
+    </div>
+  </main>
+</body>
+</html>

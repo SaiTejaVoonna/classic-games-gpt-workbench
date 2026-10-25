@@ -1,0 +1,75 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Racer mocks</title>
+<style>
+body{margin:0;background:#cfd3da;font-family:system-ui,Segoe UI,Roboto,sans-serif;padding:28px;width:1360px}
+h1{font-size:22px;margin:0 0 4px}p.sub{margin:0 0 20px;color:#444;font-size:14px}
+.row{display:flex;gap:28px;align-items:flex-start}
+.ph{width:300px;height:640px;border-radius:38px;border:8px solid #111;overflow:hidden;position:relative;box-shadow:0 8px 24px #0004}
+.cap{width:300px;text-align:center;font-size:13px;margin-top:8px;color:#222;font-weight:600}
+.light{--bg:#f3efe7;--card:#faf6ee;--ink:#231f1a;--mut:#6b645a;--line:#d9cfb8;--acc:#2f7d4f}
+.dark{--bg:#070d18;--card:#0e1829;--ink:#eaf1ff;--mut:#9fb0cc;--line:#14233a;--acc:#34e39c}
+.ph{background:var(--bg);color:var(--ink)}
+.sb{position:absolute;top:0;left:0;right:0;height:26px;font-size:11px;padding:6px 20px;display:flex;justify-content:space-between;color:var(--mut);z-index:5}
+.hud{position:absolute;left:10px;right:10px;top:32px;display:flex;gap:6px;z-index:4}
+.hud div{flex:1;background:#0008;color:#cfe;border-radius:12px;text-align:center;padding:5px 0;font-size:10px}
+.light .hud div{background:var(--card);color:var(--mut);border:1px solid var(--line)}
+.hud b{display:block;font-size:18px;color:#fff}.light .hud b{color:var(--ink)}
+.road{position:absolute;inset:0}
+.hd{padding:40px 16px 0}.hd h2{margin:0 0 4px;font-size:22px}.hd p{margin:0 0 14px;color:var(--mut);font-size:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;margin-bottom:12px;overflow:hidden}
+.card .art{height:120px;position:relative}
+.card .meta{padding:10px 14px;display:flex;justify-content:space-between;align-items:center}
+.card b{font-size:16px}.card small{display:block;color:var(--mut);font-size:11px}
+.play{background:var(--acc);color:#fff;border-radius:999px;padding:7px 16px;font-weight:700;font-size:13px}.dark .play{color:#04140c}
+.soon{opacity:.55}
+.tabs{position:absolute;bottom:0;left:0;right:0;height:56px;background:var(--card);border-top:1px solid var(--line);display:flex;justify-content:space-around;align-items:center;font-size:11px;color:var(--mut)}
+</style></head><body>
+<h1>Next game: Racer (modern take on the classic phone racing game) + launcher</h1><p class="sub">Mock-ups only, nothing built yet.</p>
+<div class="row" id="r"></div>
+<script>
+const W=284,H=624;
+function car(x,y,col,o={}){ // top-down car, centred x,y ; size 38x70
+  const w=o.w||38,h=o.h||70; const tail=o.rear?`<rect x="${x-w/2+3}" y="${y+h/2-5}" width="8" height="4" rx="2" fill="#ff4d4d"/><rect x="${x+w/2-11}" y="${y+h/2-5}" width="8" height="4" rx="2" fill="#ff4d4d"/>`:'';
+  const head=o.head?`<rect x="${x-w/2+3}" y="${y-h/2+1}" width="9" height="5" rx="2" fill="#fff6c8"/><rect x="${x+w/2-12}" y="${y-h/2+1}" width="9" height="5" rx="2" fill="#fff6c8"/>`:'';
+  return `<g transform="rotate(${o.rot||0} ${x} ${y})"><ellipse cx="${x}" cy="${y+h/2-2}" rx="${w/2+3}" ry="6" fill="#000" opacity=".25"/>
+  <rect x="${x-w/2-2}" y="${y-h/2+10}" width="5" height="16" rx="2" fill="#111"/><rect x="${x+w/2-3}" y="${y-h/2+10}" width="5" height="16" rx="2" fill="#111"/>
+  <rect x="${x-w/2-2}" y="${y+h/2-26}" width="5" height="16" rx="2" fill="#111"/><rect x="${x+w/2-3}" y="${y+h/2-26}" width="5" height="16" rx="2" fill="#111"/>
+  <rect x="${x-w/2}" y="${y-h/2}" width="${w}" height="${h}" rx="12" fill="${col}"/>
+  <rect x="${x-w/2+5}" y="${y-h/2+16}" width="${w-10}" height="14" rx="5" fill="#1b2433" opacity=".85"/>
+  <rect x="${x-w/2+6}" y="${y+6}" width="${w-12}" height="12" rx="4" fill="#1b2433" opacity=".85"/>
+  <rect x="${x-w/2+4}" y="${y-h/2+3}" width="${w-8}" height="${h/2}" rx="9" fill="#fff" opacity=".16"/>${tail}${head}</g>`;
+}
+function road(night,extra,shift=0){
+  const grass=night?'#0b1a12':'#7fb069', asph=night?'#161c28':'#4b5563', line=night?'#8aa0c0':'#f5f1e6', edge=night?'#2a3550':'#e5e1d3';
+  let s=`<rect width="${W}" height="${H}" fill="${grass}"/>`;
+  // trees / roadside
+  for(let i=0;i<8;i++){const y=(i*95+shift)%H; s+=`<circle cx="22" cy="${y}" r="13" fill="${night?'#0f2a1c':'#4c8a4c'}"/><circle cx="262" cy="${(y+40)%H}" r="13" fill="${night?'#0f2a1c':'#4c8a4c'}"/>`}
+  s+=`<rect x="46" y="0" width="192" height="${H}" fill="${asph}"/><rect x="46" y="0" width="4" height="${H}" fill="${edge}"/><rect x="234" y="0" width="4" height="${H}" fill="${edge}"/>`;
+  for(let i=0;i<9;i++){const y=(i*80+shift)%(H+40)-30; s+=`<rect x="108" y="${y}" width="4" height="40" rx="2" fill="${line}"/><rect x="172" y="${y}" width="4" height="40" rx="2" fill="${line}"/>`}
+  return s+extra;
+}
+const lane=(i)=>77+i*64; // 3 lanes inside the road: centres 77..205 -> shift
+const L=[79,142,205];
+function ph(theme,body,cap){return `<div><div class="ph ${theme}"><div class="sb"><span>11:09</span><span>5G 87%</span></div>${body}</div><div class="cap">${cap}</div></div>`}
+const hud=(a,b,c)=>`<div class="hud"><div><b>${a}</b>SCORE</div><div><b>${b}</b>BEST</div><div><b>${c}</b>SPEED</div></div>`;
+let r='';
+// launcher
+r+=ph('light',`<div class="hd"><h2>Classic Games</h2><p>Pick a game. Everything is saved on this phone.</p>
+<div class="card"><div class="art" style="background:#e9e1cf"><svg viewBox="0 0 284 120" width="100%" height="120"><path d="M40 80 C80 80 80 40 120 40 S170 90 210 70 S250 50 262 60" fill="none" stroke="#2f7d4f" stroke-width="16" stroke-linecap="round"/><circle cx="262" cy="60" r="10" fill="#1f5c38"/><circle cx="60" cy="30" r="9" fill="#c2410c"/></svg></div><div class="meta"><div><b>Snake</b><small>Best 31 · 12 mazes</small></div><span class="play">Play</span></div></div>
+<div class="card"><div class="art" style="background:#4b5563"><svg viewBox="0 0 284 120" width="100%" height="120"><rect x="110" y="0" width="4" height="40" fill="#f5f1e6"/><rect x="170" y="0" width="4" height="40" fill="#f5f1e6"/><rect x="110" y="80" width="4" height="40" fill="#f5f1e6"/><rect x="170" y="80" width="4" height="40" fill="#f5f1e6"/>${car(142,60,'#2563eb',{w:30,h:56,head:1})}${car(80,30,'#dc2626',{w:30,h:56,rear:1})}</svg></div><div class="meta"><div><b>Racer</b><small>New · Best 0</small></div><span class="play">Play</span></div></div>
+<div class="card soon"><div class="meta"><div><b>More classics</b><small>Pairs, Space Impact style, Bantumi style…</small></div><span style="color:var(--mut);font-size:12px">Soon</span></div></div></div>
+<div class="tabs"><span>🎮 Games</span><span>🏆 Scores</span><span>⚙ App settings</span></div>`,'Launcher: one home for every game');
+// day gameplay
+r+=ph('light',hud(240,512,'120')+`<svg class="road" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid slice" style="top:0;position:absolute;left:0;width:100%;height:100%">${road(false,
+ car(L[0],150,'#dc2626',{rear:1})+car(L[2],270,'#f59e0b',{rear:1})+car(L[1],60,'#7c3aed',{rear:1})+car(L[1],520,'#2563eb',{head:1}),20)}</svg>`,'Day: swipe left or right to change lane, speed builds up');
+// night + near miss
+r+=ph('dark',hud(380,512,'180')+`<svg class="road" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid slice" style="position:absolute;left:0;top:0;width:100%;height:100%">${road(true,
+ `<defs><linearGradient id="hl" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#fff6c8" stop-opacity=".55"/><stop offset="1" stop-color="#fff6c8" stop-opacity="0"/></linearGradient></defs><polygon points="${L[2]-16},490 ${L[2]+16},490 ${L[2]+44},260 ${L[2]-44},260" fill="url(#hl)"/>`+
+ car(L[0],180,'#ef4444',{rear:1})+car(L[1],110,'#a78bfa',{rear:1})+car(L[2],520,'#22d3ee',{head:1,rot:-4})+`<text x="${L[1]+4}" y="420" fill="#ffd166" font-size="18" font-weight="800" text-anchor="middle">CLOSE! +5</text>`,60)}</svg>`,'Night: headlight beams, near miss bonus popup');
+// crash
+r+=ph('dark',hud(412,512,'0')+`<svg class="road" viewBox="0 0 ${W} ${H}" style="position:absolute;left:0;top:0;width:100%;height:100%" preserveAspectRatio="xMidYMid slice">${road(true,
+ car(L[1],330,'#ef4444',{rear:1})+car(L[1]-6,395,'#22d3ee',{head:1,rot:-18})+
+ `<circle cx="${L[1]}" cy="360" r="26" fill="#ffd166" opacity=".35"/>`+[0,1,2,3,4,5,6,7].map(i=>`<circle cx="${L[1]+Math.cos(i)*30}" cy="${360+Math.sin(i*1.7)*26}" r="${3+(i%3)}" fill="#ffb347"/>`).join('')+
+ `<circle cx="${L[1]+8}" cy="318" r="12" fill="#888" opacity=".5"/><circle cx="${L[1]+16}" cy="298" r="16" fill="#777" opacity=".35"/>`,10)}</svg>
+ <div style="position:absolute;inset:0;background:#0007"></div><div style="position:absolute;left:30px;right:30px;top:190px;background:var(--card);border:2px solid var(--acc);border-radius:20px;padding:18px;text-align:center"><div style="font-size:20px;font-weight:700">Crash!</div><div style="font-size:44px;font-weight:800;color:var(--acc)">412</div><div style="color:#ffd166;font-size:12px">★ New best</div><div style="margin-top:12px;background:var(--acc);color:#04140c;border-radius:999px;padding:10px;font-weight:700">Play again</div></div>`,'Crash: smoke and sparks, shake, score card');
+document.getElementById('r').innerHTML=r;
+</script></body></html>

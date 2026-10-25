@@ -1,0 +1,116 @@
+<!doctype html><html><head><meta charset="utf-8"><title>M2 mocks</title>
+<style>
+body{margin:0;background:#cfd3da;font-family:system-ui,Segoe UI,Roboto,sans-serif;padding:28px;width:1500px}
+h1{font-size:22px;margin:0 0 4px}p.sub{margin:0 0 20px;color:#444;font-size:14px}
+.row{display:flex;gap:28px;align-items:flex-start}
+.ph{width:300px;height:640px;border-radius:38px;border:8px solid #111;overflow:hidden;position:relative;box-shadow:0 8px 24px #0004}
+.cap{width:300px;text-align:center;font-size:13px;margin-top:8px;color:#222;font-weight:600}
+.light{--bg:#f3efe7;--card:#faf6ee;--ink:#231f1a;--mut:#6b645a;--board:#e9e1cf;--line:#d9cfb8;--acc:#2f7d4f}
+.dark{--bg:#070d18;--card:#0e1829;--ink:#eaf1ff;--mut:#9fb0cc;--board:#08111f;--line:#14233a;--acc:#34e39c}
+.ph{background:var(--bg);color:var(--ink)}
+.hud{position:absolute;left:10px;right:10px;top:34px;display:flex;gap:6px}
+.hud div{flex:1;background:var(--card);border:1px solid var(--line);border-radius:12px;text-align:center;padding:5px 0;font-size:10px;color:var(--mut)}
+.hud b{display:block;font-size:18px;color:var(--ink)}
+.bd{position:absolute;left:10px;right:10px;top:100px;height:470px;border-radius:14px;background:var(--board);border:2px solid var(--ink);overflow:hidden}
+.bar{position:absolute;left:10px;right:10px;bottom:14px;display:flex;gap:8px}
+.bar span{flex:1;background:var(--card);border:1px solid var(--line);border-radius:999px;text-align:center;padding:9px 0;font-size:12px;font-weight:600}
+.pill{position:absolute;top:8px;right:10px;background:#0006;color:#fff;border-radius:999px;font-size:10px;padding:4px 9px}
+.note{position:absolute;left:10px;right:10px;top:8px;font-size:10px;text-align:center;color:var(--mut)}
+.sb{position:absolute;top:0;left:0;right:0;height:26px;font-size:11px;padding:6px 20px;display:flex;justify-content:space-between;color:var(--mut)}
+.tl{position:absolute;left:10px;right:10px;top:34px;display:flex;justify-content:space-between;font-weight:700;font-size:15px}
+.set{padding:44px 16px 0}.set h3{margin:0 0 12px}.grp{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:10px;font-size:13px}
+.grp small{display:block;color:var(--mut);margin-bottom:8px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;font-size:10px}
+.seg{display:flex;gap:6px}.seg i{flex:1;font-style:normal;text-align:center;border:1px solid var(--line);border-radius:10px;padding:9px 0;font-weight:600}
+.seg i.on{background:var(--acc);color:#fff;border-color:var(--acc)}.dark .seg i.on{color:#04140c}
+.tog{display:flex;justify-content:space-between;align-items:center;padding:6px 0}.sw{width:38px;height:22px;border-radius:99px;background:var(--acc);position:relative}.sw:after{content:"";position:absolute;right:3px;top:3px;width:16px;height:16px;border-radius:50%;background:#fff}.sw.off{background:var(--line)}.sw.off:after{right:auto;left:3px}
+.story{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;width:1030px}
+.fr{background:var(--board);border:2px solid var(--ink);border-radius:12px;height:230px;position:relative;overflow:hidden}
+.fr+.t{font-size:12px;text-align:center;margin:6px 0 14px;color:#222;font-weight:600}
+.sec{font-weight:700;margin:26px 0 8px;font-size:15px}
+</style></head><body>
+<h1>Snake: look, motion and full screen (mocks)</h1><p class="sub">Drawn mock-ups of what M2 could look like. Not built yet.</p>
+<div class="row" id="r1"></div>
+<div class="sec">Animation storyboard (about 0.4 s each, all turn off with Reduce motion)</div>
+<div class="row" id="r2"></div>
+<script>
+const CELL=23, COLS=14, ROWS=21;
+function pts(cells){return cells.map(([x,y])=>[x*CELL+CELL/2,y*CELL+CELL/2]);}
+function snake(theme,o){
+  const d=theme==='dark';
+  const body=d?'#34e39c':'#2f7d4f', head=d?'#7cf7c0':'#1f5c38', edge=d?'#01070a':'#1b3d2a';
+  const c=o.cells, p=pts(c);
+  const path='M'+p.map(a=>a.join(',')).join(' L');
+  let s='';
+  if(d&&o.glow) s+=`<path d="${path}" fill="none" stroke="${body}" stroke-width="20" stroke-linecap="round" stroke-linejoin="round" opacity=".35" filter="url(#bl)"/>`;
+  // motion trail (faint ghost cells behind the tail)
+  (o.trail||[]).forEach((t,i)=>{const q=pts([t])[0];s+=`<circle cx="${q[0]}" cy="${q[1]}" r="${7-i*2}" fill="${body}" opacity="${.22-i*.07}"/>`});
+  s+=`<path d="${path}" fill="none" stroke="${edge}" stroke-width="21" stroke-linecap="round" stroke-linejoin="round" opacity=".35" transform="translate(0,2)"/>`;
+  s+=`<path d="${path}" fill="none" stroke="${body}" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/>`;
+  s+=`<path d="${path}" fill="none" stroke="#fff" stroke-opacity=".22" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" transform="translate(-3,-3)"/>`;
+  // scale pattern: dots along the body
+  p.forEach((q,i)=>{ if(i>0&&i<p.length-1) s+=`<circle cx="${q[0]}" cy="${q[1]}" r="3" fill="#000" opacity=".12"/>`;});
+  // bulge (eaten food travelling down the body)
+  if(o.bulge!=null){const q=p[o.bulge];s+=`<circle cx="${q[0]}" cy="${q[1]}" r="11.5" fill="${body}" stroke="${edge}" stroke-opacity=".3"/><circle cx="${q[0]-2}" cy="${q[1]-2}" r="4" fill="#fff" opacity=".25"/>`;}
+  const h=p[0], n=p[1]; let dx=h[0]-n[0], dy=h[1]-n[1]; const L=Math.hypot(dx,dy)||1; dx/=L; dy/=L;
+  const px=-dy, py=dx;
+  s+=`<circle cx="${h[0]}" cy="${h[1]}" r="12.5" fill="${head}" stroke="${edge}" stroke-opacity=".5"/>`;
+  if(o.tongue){const bx=h[0]+dx*12,by=h[1]+dy*12,tx=bx+dx*12,ty=by+dy*12;
+    s+=`<path d="M${bx},${by} L${tx},${ty} M${tx},${ty} l${dx*5+px*4},${dy*5+py*4} M${tx},${ty} l${dx*5-px*4},${dy*5-py*4}" stroke="#ef4444" stroke-width="2" stroke-linecap="round" fill="none"/>`;}
+  if(o.mouth){s+=`<path d="M${h[0]+dx*4+px*6},${h[1]+dy*4+py*6} Q${h[0]+dx*15},${h[1]+dy*15} ${h[0]+dx*4-px*6},${h[1]+dy*4-py*6} Z" fill="#3a0d12"/>`;}
+  [1,-1].forEach(k=>{const ex=h[0]+dx*3+px*5*k, ey=h[1]+dy*3+py*5*k;
+    s+=`<circle cx="${ex}" cy="${ey}" r="3.6" fill="#fff"/>`+(o.blink?`<path d="M${ex-3},${ey} h6" stroke="#111" stroke-width="1.5"/>`:`<circle cx="${ex+dx*1.2}" cy="${ey+dy*1.2}" r="1.9" fill="#111"/>`);});
+  return s;
+}
+function fruit(theme,x,y,o={}){
+  const d=theme==='dark', col=d?'#ff6b5e':'#c2410c';
+  const r=9*(o.scale||1);
+  let s='';
+  if(o.ring) s+=`<circle cx="${x}" cy="${y}" r="${r+7}" fill="none" stroke="${col}" stroke-opacity=".5" stroke-width="2"/><circle cx="${x}" cy="${y}" r="${r+13}" fill="none" stroke="${col}" stroke-opacity=".22" stroke-width="2"/>`;
+  s+=`<circle cx="${x}" cy="${y+1.5}" r="${r}" fill="#000" opacity=".2"/><circle cx="${x}" cy="${y}" r="${r}" fill="${col}"/><circle cx="${x-3}" cy="${y-3}" r="${r*.3}" fill="#fff" opacity=".6"/><path d="M${x},${y-r} q4,-7 9,-5 q-3,6 -9,5z" fill="${d?'#34e39c':'#2f7d4f'}"/>`;
+  return s;
+}
+function particles(theme,x,y,n=10,R=26){
+  const col=theme==='dark'?'#ffd166':'#c2410c'; let s='';
+  for(let i=0;i<n;i++){const a=i/n*6.283, r=R*(.6+.4*((i*37)%10)/10);
+    s+=`<circle cx="${x+Math.cos(a)*r}" cy="${y+Math.sin(a)*r}" r="${2+(i%3)}" fill="${col}" opacity="${.9-(i%3)*.2}"/>`;}
+  return s;
+}
+function grid(theme){const l=theme==='dark'?'#14233a':'#d9cfb8';let s='';for(let i=1;i<COLS;i++)s+=`<line x1="${i*CELL}" y1="0" x2="${i*CELL}" y2="${ROWS*CELL}" stroke="${l}" stroke-width=".8"/>`;for(let j=1;j<ROWS;j++)s+=`<line x1="0" y1="${j*CELL}" x2="${COLS*CELL}" y2="${j*CELL}" stroke="${l}" stroke-width=".8"/>`;return s;}
+const DEFS=`<defs><filter id="bl"><feGaussianBlur stdDeviation="6"/></filter></defs>`;
+function svg(inner,w=322,h=470){return `<svg viewBox="0 0 ${COLS*CELL} ${ROWS*CELL}" width="${w}" height="${h}" preserveAspectRatio="xMidYMid slice">${DEFS}${inner}</svg>`;}
+function phone(theme,title,body,cap){return `<div><div class="ph ${theme}"><div class="sb"><span>11:09</span><span>5G 87%</span></div>${body}</div><div class="cap">${cap}</div></div>`;}
+const snakeA=[[7,10],[6,10],[5,10],[4,10],[4,11],[4,12],[5,12],[6,12]];
+const snakeB=[[8,8],[8,9],[8,10],[7,10],[6,10],[6,11],[6,12],[5,12],[4,12]];
+function immersive(theme,cells,extra,fr,top){
+  const hud=`<div class="hud"><div><b>12</b>SCORE</div><div><b>31</b>BEST</div><div><b>8</b>LENGTH</div><div><b>♥ 3</b>LIVES</div></div>`;
+  return hud+`<div class="bd">${svg(grid(theme)+fr+snake(theme,extra))}</div><div class="bar"><span>❚❚ Pause</span><span>⛶ Exit full screen</span><span>✥ D-pad</span></div>`;
+}
+const r1=document.getElementById('r1');
+r1.innerHTML=
+ phone('light','',immersive('light',snakeA,{cells:snakeA,tongue:true,trail:[[7,10]]},fruit('light',9*CELL+11,10*CELL+11,{scale:1.05})),'Light: tongue flick, soft shadow, fruit wobble')+
+ phone('dark','',immersive('dark',snakeB,{cells:snakeB,glow:true,mouth:true,bulge:2},fruit('dark',8*CELL+11,5*CELL+11,{ring:true})+particles('dark',8*CELL+11,6*CELL+11,12,28),0),'Dark: glow, mouth opens at the fruit, bulge slides down the body, sparkles')+
+ phone('dark','',`<div class="set"><h3>Settings</h3>
+ <div class="grp"><small>Appearance</small><div class="seg"><i>Light</i><i class="on">Dark</i><i>Auto</i></div></div>
+ <div class="grp"><small>Snake colour</small><div class="seg"><i class="on">●</i><i>●</i><i>●</i><i>●</i></div></div>
+ <div class="grp"><small>Effects</small><div class="tog">Snake animation<span class="sw"></span></div><div class="tog">Particles and glow<span class="sw"></span></div><div class="tog">Screen shake on game over<span class="sw"></span></div><div class="tog">Reduce motion (follows phone)<span class="sw off"></span></div></div>
+ <div class="grp"><small>Display</small><div class="tog">Full screen board<span class="sw"></span></div><div style="color:var(--mut);font-size:11px">On iPhone: tap Share, then Add to Home Screen, to play with no browser bars.</div></div></div>`,'Settings: Light, Dark or Auto, effect toggles, full screen')+
+ phone('light','',`<div class="tl"><span>Classic Games</span><span>🏆 ? ⚙</span></div><div class="note"></div><div class="bd" style="top:80px;height:480px;background:#0b1220"><div style="position:absolute;inset:0;background:#0009;display:grid;place-content:center;text-align:center;color:#fff;gap:12px"><div style="font-size:84px;font-weight:800">3</div><div style="font-size:13px;opacity:.85">Swipe to steer. Get ready.</div></div>${svg(grid('dark')+snake('dark',{cells:snakeA}) ,322,470)}</div><div class="bar"><span>Pause</span><span>New game</span></div>`,'Start: 3 2 1 countdown, then go');
+// storyboard
+const frames=[
+ {t:'1. Approach: head turns toward fruit, tongue flicks',cells:[[6,5],[5,5],[4,5],[3,5]],o:{tongue:true},fx:fruit('dark',9*CELL+11,5*CELL+11)},
+ {t:'2. Bite: mouth opens, fruit shrinks, sparkles',cells:[[8,5],[7,5],[6,5],[5,5]],o:{mouth:true},fx:fruit('dark',9*CELL+11,5*CELL+11,{scale:.5})+particles('dark',9*CELL+11,5*CELL+11,10,20)},
+ {t:'3. Swallow: bulge slides down the body, +1 floats up',cells:[[9,5],[8,5],[7,5],[6,5],[5,5]],o:{bulge:3},fx:`<text x="${9*CELL}" y="${4*CELL}" fill="#ffd166" font-size="20" font-weight="700">+1</text>`},
+ {t:'4. Grow: body stretches one cell, new fruit pops in',cells:[[10,5],[9,5],[8,5],[7,5],[6,5],[5,5]],o:{blink:true},fx:fruit('dark',3*CELL+11,9*CELL+11,{ring:true,scale:.8})}
+];
+const deadFr=[
+ {t:'Game over: snake flashes, board shakes',cells:[[7,7],[7,8],[7,9],[7,10]],o:{blink:true},fx:`<rect x="0" y="0" width="${COLS*CELL}" height="${ROWS*CELL}" fill="#ef4444" opacity=".18"/>`},
+ {t:'Segments fade out tail to head',cells:[[7,7],[7,8]],o:{blink:true},fx:particles('dark',7*CELL+11,9*CELL+11,8,22)},
+ {t:'Card slides up: score counts up, New best badge',cells:[],o:{},fx:'card'},
+ {t:'Bonus diamond: ring empties, pulses faster at the end',cells:[[4,9],[3,9],[2,9]],o:{},fx:`<path d="M${9*CELL+11} ${8*CELL} l12 ${CELL/2+2} l-12 ${CELL/2+2} l-12 -${CELL/2-2}z" fill="#ffd166"/><circle cx="${9*CELL+11}" cy="${9*CELL}" r="24" fill="none" stroke="#ffd166" stroke-width="3" stroke-dasharray="90 60"/>`}
+];
+function fr(f){let inner=grid('dark');
+  if(f.fx==='card'){inner+=`<rect x="40" y="150" width="${COLS*CELL-80}" height="170" rx="18" fill="#0e1829" stroke="#34e39c" stroke-width="3"/><text x="${COLS*CELL/2}" y="195" fill="#eaf1ff" font-size="22" font-weight="700" text-anchor="middle">Game over</text><text x="${COLS*CELL/2}" y="245" fill="#34e39c" font-size="44" font-weight="800" text-anchor="middle">28</text><text x="${COLS*CELL/2}" y="270" fill="#ffd166" font-size="13" text-anchor="middle">★ New best</text><rect x="90" y="285" width="140" height="26" rx="13" fill="#34e39c"/><text x="${COLS*CELL/2}" y="303" font-size="14" font-weight="700" text-anchor="middle" fill="#04140c">Play again</text>`;}
+  else inner+=(f.cells.length?snake('dark',Object.assign({cells:f.cells,glow:true},f.o)):'')+f.fx;
+  return `<div><div class="fr">${`<svg viewBox="0 0 ${COLS*CELL} ${ROWS*CELL}" width="100%" height="100%" preserveAspectRatio="xMidYMid slice">${DEFS}${inner}</svg>`}</div><div class="t">${f.t}</div></div>`;}
+document.getElementById('r2').innerHTML=`<div class="story">${frames.map(fr).join('')}${deadFr.map(fr).join('')}</div>`;
+</script></body></html>

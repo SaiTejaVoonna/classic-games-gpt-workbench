@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en" data-theme="night">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Snake layout mockups (not the game)</title>
+<link rel="stylesheet" href="../../styles.css">
+<style>
+  /* Mockup only. Static frames drawn with the real renderer. Not part of the game. */
+  body { background: #05080f; padding: 24px; display: flex; flex-wrap: wrap; gap: 28px; align-items: flex-start; }
+  html[data-theme="colour"] body { background: #cfc8b6; }
+  html[data-theme="lcd"] body { background: #98a971; }
+  .frame { position: relative; flex: none; background: var(--bg); color: var(--ink); overflow: hidden; border-radius: 22px; border: 1px solid var(--line); font-family: var(--font); }
+  .phone { width: 390px; height: 844px; }
+  .desk { width: 1366px; height: 768px; border-radius: 14px; }
+  .m-top { display: flex; align-items: center; justify-content: space-between; padding: 6px 10px 6px 16px; height: 56px; border-bottom: 1px solid var(--line); }
+  .m-top .wm { font-weight: 700; letter-spacing: .02em; } .m-top .wm span { font-weight: 400; color: var(--muted); margin-left: .25em; }
+  .m-ic { display: flex; gap: 2px; }
+  .m-ic i { width: 44px; height: 44px; display: grid; place-items: center; border-radius: 10px; font-style: normal; }
+  .m-ic i.off { opacity: .4; }
+  svg.i { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  .m-hud { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; padding: 10px 16px 8px; }
+  .cell { text-align: center; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 6px 2px 5px; }
+  .cell svg.i { width: 18px; height: 18px; color: var(--muted); }
+  .cell b { display: block; font-size: 1.15rem; line-height: 1.15; font-variant-numeric: tabular-nums; }
+  .cell small { display: block; font-size: .625rem; color: var(--muted); letter-spacing: .05em; text-transform: uppercase; }
+  .boardbox { position: relative; margin: 0 16px; border: 2px solid var(--ink); border-radius: 12px; background: var(--board); overflow: hidden; }
+  .boardbox canvas { display: block; width: 100%; height: 100%; }
+  .veil { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: 12px; background: color-mix(in srgb, var(--board) 62%, transparent); text-align: center; }
+  .veil h3 { margin: 0; font-size: 1.5rem; }
+  .veil p { margin: 0; color: var(--muted); font-size: .875rem; }
+  .bigbtn { min-width: 170px; height: 56px; padding: 0 28px; border-radius: 999px; background: var(--accent); color: var(--accent-ink); font-weight: 700; font-size: 1.15rem; display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: 0; }
+  .bigbtn.alt { background: var(--surface); color: var(--ink); border: 1px solid var(--ink); min-width: 140px; height: 48px; font-size: 1rem; }
+  .chips { display: flex; gap: 8px; padding: 10px 16px 0; flex-wrap: nowrap; }
+  .chip { height: 36px; padding: 0 11px; display: inline-flex; align-items: center; gap: 6px; font-size: .8125rem; font-weight: 600; background: var(--surface); border: 1px solid var(--line); border-radius: 999px; white-space: nowrap; }
+  .chip svg.i { width: 16px; height: 16px; }
+  .m-ctl { position: absolute; left: 0; right: 0; bottom: 0; height: 104px; display: flex; align-items: center; justify-content: space-between; padding: 0 28px 14px; }
+  .round { width: 56px; height: 56px; border-radius: 50%; background: var(--surface); border: 1px solid var(--line); display: grid; place-items: center; }
+  .round.main { width: 72px; height: 72px; background: var(--accent); color: var(--accent-ink); border: 0; }
+  .round.main svg.i { width: 30px; height: 30px; }
+  .note { position: absolute; left: 16px; right: 16px; bottom: 108px; text-align: center; font-size: .75rem; color: var(--muted); }
+  .sheet { position: absolute; left: 0; right: 0; bottom: 0; background: var(--surface); border-top: 2px solid var(--ink); border-radius: 22px 22px 0 0; padding: 14px 16px 22px; }
+  .sheet h4 { margin: 0 0 10px; font-size: 1.05rem; }
+  .row { margin: 0 0 12px; } .row label { display: block; font-size: .75rem; color: var(--muted); margin-bottom: 5px; text-transform: uppercase; letter-spacing: .05em; }
+  .seg { display: flex; gap: 6px; } .seg span { flex: 1; text-align: center; height: 44px; line-height: 44px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg); font-weight: 600; font-size: .9rem; }
+  .seg span.on { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+  .slider { position: relative; height: 44px; display: flex; align-items: center; padding: 0 16px; }
+  .slider .track { position: absolute; left: 22px; right: 22px; height: 6px; background: var(--line); border-radius: 3px; }
+  .slider .stops { position: relative; width: 100%; display: flex; justify-content: space-between; }
+  .slider .stops i { width: 22px; height: 22px; border-radius: 50%; background: var(--bg); border: 2px solid var(--line); display: block; }
+  .slider .stops i.on { background: var(--accent); border-color: var(--accent); }
+  .slabels { display: flex; justify-content: space-between; font-size: .75rem; color: var(--muted); padding: 0 6px; }
+  .cap { font: 600 13px/1.2 system-ui; color: #fff; margin: 0 0 8px 4px; }
+  html[data-theme="colour"] .cap, html[data-theme="lcd"] .cap { color: #1c1b17; }
+  .wrap { flex: none; }
+  /* desktop */
+  .d-main { display: grid; grid-template-columns: 1fr 310px; gap: 28px; padding: 18px 40px; height: calc(768px - 56px); }
+  .d-board { display: grid; place-items: center; }
+  .d-side { display: grid; gap: 12px; align-content: start; }
+  .d-side .cells { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .d-side .cell { padding: 10px 4px; }
+  .d-btns { display: flex; gap: 10px; align-items: center; }
+  .d-btns .round { width: 52px; height: 52px; }
+  .d-btns .round.main { width: 64px; height: 64px; }
+</style>
+</head>
+<body>
+<script src="../../src/engine.js"></script>
+<script src="../../src/render.js"></script>
+<script>
+(function () {
+  var q = new URLSearchParams(location.search);
+  var theme = q.get('theme') || 'night';
+  document.documentElement.setAttribute('data-theme', theme);
+  var E = window.SnakeEngine, Rn = window.SnakeRender;
+  var css = function (n) { return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); };
+  var pal = function () { return { boardLine: css('--board-line'), snake: css('--snake'), snakeHead: css('--snake-head'), snakeEdge: css('--snake-edge'), shine: css('--shine'), eye: css('--eye'), pupil: css('--pupil'), food: css('--food'), bonus: css('--bonus'), obstacle: css('--obstacle'), obstacleEdge: css('--obstacle-edge') }; };
+
+  var P = {
+    trophy: '<path d="M8 4h8v5a4 4 0 0 1-8 0z"/><path d="M8 6H5v1.5A3 3 0 0 0 8 10.5M16 6h3v1.5a3 3 0 0 1-3 3"/><path d="M12 13v4M9 20h6M10.5 17h3V20h-3z"/>',
+    help: '<circle cx="12" cy="12" r="9"/><path d="M9.6 9.4a2.5 2.5 0 1 1 3.5 2.3c-.7.4-1.1.9-1.1 1.7"/><path d="M12 17h.01"/>',
+    gear: '<circle cx="12" cy="12" r="5.5"/><circle cx="12" cy="12" r="2"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/>',
+    full: '<path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>',
+    apple: '<circle cx="12" cy="13" r="7"/><path d="M12 6c0-1.2.6-2.2 1.6-2.8"/>',
+    snake: '<path d="M5 18c4 0 4-5 8-5s3-6 6-6"/><circle cx="19.5" cy="6.5" r="1.2"/>',
+    heart: '<path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.4A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/>',
+    gauge: '<path d="M4 17a8 8 0 1 1 16 0"/><path d="M12 17l4-5"/>',
+    pause: '<path d="M9 5v14M15 5v14"/>',
+    play: '<path d="M8 5l11 7-11 7z"/>',
+    restart: '<path d="M5 12a7 7 0 1 0 2.2-5.1"/><path d="M5 4v4h4"/>',
+    dpad: '<path d="M12 4v5M12 15v5M4 12h5M15 12h5"/>',
+    sound: '<path d="M5 10v4h3l4 3V7L8 10z"/><path d="M16 9.5a4 4 0 0 1 0 5"/>',
+    wrap: '<path d="M5 8h13l-3-3M19 16H6l3 3"/>',
+    maze: '<path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/>',
+    diamond: '<path d="M12 4l7 8-7 8-7-8z"/>'
+  };
+  var ic = function (n, c) { return '<svg class="i ' + (c || '') + '" viewBox="0 0 24 24" aria-hidden="true">' + P[n] + '</svg>'; };
+
+  // boards: [cols, rows] and a winding snake
+  var SNAKE_P = [[10,6],[9,6],[8,6],[7,6],[6,6],[6,7],[6,8],[7,8],[8,8],[9,8],[10,8],[10,9],[10,10],[9,10],[8,10],[7,10],[6,10],[5,10]];
+  var SNAKE_L = [[15,5],[14,5],[13,5],[12,5],[11,5],[10,5],[10,6],[10,7],[11,7],[12,7],[13,7],[14,7],[14,8],[14,9],[13,9],[12,9],[11,9],[10,9],[9,9]];
+  function game(kind, over) {
+    var cols = kind === 'p' ? 14 : 21, rows = kind === 'p' ? 20 : 14;
+    var g = E.createGame({ seed: 3, cols: cols, rows: rows, lives: 'extra' });
+    return Object.assign({}, g, over || {});
+  }
+  function toCells(a) { return a.map(function (c) { return { x: c[0], y: c[1] }; }); }
+  function mkCanvas(box, g, w, h) {
+    var c = document.createElement('canvas'); var dpr = 2;
+    c.width = w * dpr; c.height = h * dpr; box.appendChild(c);
+    Rn.draw(c.getContext('2d'), g, pal(), c.width, c.height);
+  }
+  var capText = '';
+  function el(html, cls) { var w = document.createElement('div'); w.className = 'wrap'; var c = document.createElement('div'); c.className = 'cap'; c.textContent = capText; w.appendChild(c); var d = document.createElement('div'); d.className = cls; d.innerHTML = html; w.appendChild(d); document.body.appendChild(w); return d; }
+
+  var top = function (extra) { return '<div class="m-top"><div class="wm">Classic<span>Games</span></div><div class="m-ic"><i>' + ic('trophy') + '</i><i>' + ic('help') + '</i><i>' + ic('gear') + '</i><i class="off">' + ic('full') + '</i></div></div>'; };
+  var hud = function (s) { return '<div class="m-hud">' +
+    '<div class="cell">' + ic('apple') + '<b>' + s.score + '</b><small>Score</small></div>' +
+    '<div class="cell">' + ic('trophy') + '<b>' + s.best + '</b><small>Best</small></div>' +
+    '<div class="cell">' + ic('snake') + '<b>' + s.len + '</b><small>Length</small></div>' +
+    '<div class="cell">' + ic('heart') + '<b>' + s.lives + '</b><small>Lives</small></div>' +
+    '<div class="cell">' + ic('gauge') + '<b>' + s.speed + '</b><small>Speed</small></div></div>'; };
+  var chips = '<div class="chips"><span class="chip">' + ic('wrap') + 'Wrap</span><span class="chip">' + ic('maze') + 'Clear</span><span class="chip">' + ic('heart') + '3 lives</span><span class="chip">' + ic('diamond') + 'Bonus</span></div>';
+  var ctl = function (main) { return '<div class="m-ctl"><span class="round">' + ic('restart') + '</span><span class="round main">' + ic(main) + '</span><span class="round">' + ic('dpad') + '</span></div>'; };
+  var tag = function (t) { capText = t; return ''; };
+  var BW = 358, BH = 511; // phone board: portrait 14 x 20 cells
+
+  function phone(name, o) {
+    var f = el(tag(name) + top() + hud(o.hud) + '<div class="boardbox" id="b-' + o.id + '" style="width:' + BW + 'px;height:' + BH + 'px;margin-top:2px"></div>' + (o.sheet ? '' : chips) + (o.sheet ? '' : ctl(o.main || 'pause')) + (o.sheet ? '' : '<div class="note">' + (o.note || 'Swipe on the board to steer. D-pad is optional.') + '</div>'), 'frame phone');
+    var box = f.querySelector('#b-' + o.id);
+    var g = game('p', o.state);
+    mkCanvas(box, g, BW - 4, BH - 4);
+    if (o.veil) { var v = document.createElement('div'); v.className = 'veil'; v.innerHTML = o.veil; box.appendChild(v); }
+    if (o.sheet) { var s = document.createElement('div'); s.className = 'sheet'; s.innerHTML = o.sheet; f.appendChild(s); }
+    return f;
+  }
+
+  var playState = { snake: toCells(SNAKE_P), dir: 'right', food: { x: 3, y: 4 }, bonusItem: { x: 11, y: 14, ticksLeft: 15 }, bonusTicks: 24, score: 14, status: 'running' };
+  var HUD = { score: 14, best: 42, len: 18, lives: 3, speed: 'Slow' };
+
+  var which = q.get('only');
+  var want = function (n) { return !which || which.split(',').indexOf(n) >= 0; };
+  if (want('start')) phone('A  Start', { id: 'a', hud: { score: 0, best: 42, len: 3, lives: 3, speed: 'Slow' }, state: { food: { x: 9, y: 6 } },
+    veil: '<h3>Snake</h3><span class="bigbtn">' + ic('play') + ' Play</span><p>Swipe or use the arrow keys</p>', main: 'play', note: 'Big Play button on the board. The bottom bar shows Restart, Play and the optional D-pad.' });
+  if (want('play')) phone('B  Playing', { id: 'b', hud: HUD, state: playState });
+  if (want('paused')) phone('C  Paused', { id: 'c', hud: HUD, state: playState, main: 'play',
+    veil: '<h3>Paused</h3><span class="bigbtn">' + ic('play') + ' Resume</span><span class="bigbtn alt">' + ic('restart') + ' Restart</span>' });
+  if (want('over')) phone('D  Game over', { id: 'd', hud: { score: 14, best: 42, len: 18, lives: 0, speed: 'Slow' }, state: Object.assign({}, playState, { status: 'over', bonusItem: null }), main: 'restart',
+    veil: '<h3>Game over</h3><p>Score 14 &nbsp; Best 42</p><span class="bigbtn">' + ic('restart') + ' Play again</span>' });
+  if (want('setup')) phone('E  Quick setup sheet (opens from the chips)', { id: 'e', hud: HUD, state: playState, sheet:
+    '<h4>Game setup (next run)</h4>' +
+    '<div class="row"><label>Edges</label><div class="seg"><span class="on">Wrap around</span><span>Solid walls</span></div></div>' +
+    '<div class="row"><label>Maze</label><div class="seg"><span class="on">Clear</span><span>Pillars</span><span>Gate</span><span>Frame</span></div></div>' +
+    '<div class="row"><label>Lives</label><div class="seg"><span>1</span><span class="on">3</span><span>Unlimited</span></div><div class="slabels" style="margin-top:4px"><span></span><span></span><span>Unlimited is an assist mode</span></div></div>' +
+    '<div class="row"><label>Speed (comfort setting)</label><div class="slider"><div class="track"></div><div class="stops"><i class="on"></i><i></i><i></i></div></div><div class="slabels"><span>Slow</span><span>Medium</span><span>Fast</span></div></div>' +
+    '<span class="bigbtn" style="width:100%">Start new game</span>' });
+
+  if (want('desktop')) {
+    var d = el(tag('F  Desktop') + top() +
+      '<div class="d-main"><div class="d-board"><div class="boardbox" id="b-f" style="margin:0;width:880px;height:587px"></div></div>' +
+      '<div class="d-side"><div class="cells">' +
+        '<div class="cell">' + ic('apple') + '<b>14</b><small>Score</small></div><div class="cell">' + ic('trophy') + '<b>42</b><small>Best</small></div><div class="cell">' + ic('snake') + '<b>12</b><small>Length</small></div>' +
+        '<div class="cell">' + ic('heart') + '<b>3</b><small>Lives</small></div><div class="cell">' + ic('gauge') + '<b>Slow</b><small>Speed</small></div><div class="cell">' + ic('diamond') + '<b>5 s</b><small>Bonus</small></div></div>' +
+      '<div class="d-btns"><span class="round">' + ic('restart') + '</span><span class="round main">' + ic('pause') + '</span><span class="round">' + ic('sound') + '</span><span class="round">' + ic('full') + '</span></div>' +
+      '<div class="chips" style="padding:0;flex-wrap:wrap"><span class="chip">' + ic('wrap') + 'Wrap</span><span class="chip">' + ic('maze') + 'Gate maze</span><span class="chip">' + ic('heart') + '3 lives</span><span class="chip">' + ic('diamond') + 'Bonus on</span></div>' +
+      '<span class="bigbtn alt" style="width:100%">Game setup</span><p style="margin:0;font-size:.75rem;color:var(--muted)">Arrow keys or WASD. Space pauses.</p></div></div>', 'frame desk');
+    var g2 = game('d', { snake: toCells(SNAKE_L), dir: 'right', food: { x: 17, y: 3 }, bonusItem: { x: 4, y: 11, ticksLeft: 15 }, bonusTicks: 24, score: 14, status: 'running', board: 'gate', obstacles: E.mazeCells('gate'), blocked: (function () { var b = {}; E.mazeCells('gate').forEach(function (c) { b[c.x + ',' + c.y] = true; }); return b; })() });
+    mkCanvas(d.querySelector('#b-f'), g2, 876, 583);
+  }
+  document.title = 'ready';
+})();
+</script>
+</body>
+</html>
