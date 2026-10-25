@@ -304,7 +304,10 @@
       g.fillStyle = gg; g.fill();
       if (T.sp) { g.fillStyle = mix(col, '#000000', .5); rr(x - Wd * .44, by - bh - Wd * .12, Wd * .88, Wd * .045, Wd * .02); g.fill(); }
       if (T.roof) { g.fillStyle = '#fff7a8'; rr(x - Wd * .13, by - bh - ch - Wd * .1, Wd * .26, Wd * .07, Wd * .02); g.fill(); }
-      g.fillStyle = '#1a1d25'; rr(x - Wd * .5, by - Wd * .12, Wd, Wd * .12, Wd * .05); g.fill();
+      // Keep two rear tyres visible below the body silhouette instead of one continuous bumper.
+      g.fillStyle = '#11141a'; rr(x - Wd * .49, by - Wd * .075, Wd * .19, Wd * .14, Wd * .035); g.fill(); rr(x + Wd * .30, by - Wd * .075, Wd * .19, Wd * .14, Wd * .035); g.fill();
+      g.fillStyle = '#8c96a3'; rr(x - Wd * .45, by - Wd * .045, Wd * .09, Wd * .06, Wd * .012); g.fill(); rr(x + Wd * .36, by - Wd * .045, Wd * .09, Wd * .06, Wd * .012); g.fill();
+      g.fillStyle = '#1a1d25'; rr(x - Wd * .31, by - Wd * .045, Wd * .62, Wd * .07, Wd * .025); g.fill();
       g.save(); g.shadowColor = tail; g.shadowBlur = Wd * (o.brake ? .35 : .2); g.fillStyle = tail;
       rr(x - Wd * .47, by - bh * .8, Wd * .24, Wd * .08, Wd * .03); g.fill(); rr(x + Wd * .23, by - bh * .8, Wd * .24, Wd * .08, Wd * .03); g.fill();
       g.globalAlpha = .8; g.fillRect(x - Wd * .22, by - bh * .76, Wd * .44, Wd * .022); g.restore();
